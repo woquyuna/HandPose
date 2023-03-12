@@ -4,7 +4,7 @@ import numpy as np
 def rotate_image(src,
                 angle,
                 center):
-    H, W = src.shape
+    H, W, _ = src.shape
     rot_m = cv2.getRotationMatrix2D(center, angle, 1)
     dst = cv2.warpAffine(src.copy(), rot_m, (W, H))
     return dst, rot_m

@@ -63,25 +63,28 @@ def render(src, norm_roted_landmark, angle):
     for i in range(n):
         roted_landmark[i*3+0] = norm_roted_landmark[i*3+0] * W
         roted_landmark[i*3+1] = norm_roted_landmark[i*3+1] * H
-        '''
-        TODO: How to compute rotation back matrix correctly
-        rotate landmark back to src image
-        center = np.array([W / 2, H / 2, 1])    # image center point to rotate
-        # center point SHIFTs because image is a RECANGLE when rotating and then crop to rectangle, square is no need
-        center_rot = [0,0]
-        center_rot[0] = np.dot((center, rot_m[0]))
-        center_rot[1] = np.dot((center, rot_m[1]))
-        '''
-        # compute rotate back matrix NO NEED FOR TO COMPUTE NEW CENTER
-        _, rot_m_inv = rotate_image(src.copy(), -angle, (W/2, H/2))
-        landmark = rotate_image(roted_landmark, rot_m_inv)
-        # normalize landmark to draw
-        n = len(landmark) // 3
-        for i in range(n):
-            landmark[3*i+0] = min(landmark[3*i+0]/W, 1.0)
-            landmark[3*i+1] = min(landmark[3*i+1]/H, 1.0)
-        src = draw_landmarks(src, landmark)
-        return src
+    
+    # TODO: How to compute rotation back matrix correctly
+    # rotate landmark back to src image
+    center = np.array([W / 2, H / 2, 1])    # image center point to rotate
+    # center point SHIFTs because image is a RECANGLE when rotating and then crop to rectangle, square is no need
+    center_rot = [0,0]
+    center_rot[0] = np.dot(center, rot_m[0])
+    center_rot[1] = np.dot(center, rot_m[1])
+    
+    # compute rotate back matrix NO NEED FOR TO COMPUTE NEW CENTER
+    # _, rot_m_inv = rotate_image(src.copy(), -angle, (W/2, H/2))
+    _, rot_m_inv = rotate_image(src.copy(), -angle, center_rot)
+
+    landmark = rotate_landmark(roted_landmark, rot_m_inv)
+    # normalize landmark to draw
+    n = len(landmark) // 3
+    for i in range(n):
+        landmark[3*i+0] = min(landmark[3*i+0]/W, 1.0)
+        landmark[3*i+1] = min(landmark[3*i+1]/H, 1.0)
+    src = draw_landmarks(src, landmark)
+    return src
+
 
 ''' ######
 main loop
@@ -112,7 +115,7 @@ while cap.isOpened():
         img_r = img.copy()
 
         img = img[roted_hand_box.upperLeft_y: roted_hand_box.upperLeft_y + roted_hand_box.h,
-                  roted_hand_box.upperLeft_x: roted_hand_box.upperLeft_x + roted_hand_box,w,]   # crop rectify hand
+                  roted_hand_box.upperLeft_x: roted_hand_box.upperLeft_x + roted_hand_box.w]   # crop rectify hand
 
         img_hand = img.copy()
     else:   # no hand in previous frame, input full image
@@ -142,20 +145,20 @@ while cap.isOpened():
         else:
             # TODO:debug, show rectified hand with landmark
             img_hand = draw_landmarks(img_hand, norm_landmark)
-            cv2.imshow("Rectified Hand with landmark", img_hand)
-            if cv2.waitKey(5) & 0xFF == 'q':
-                break
+            # cv2.imshow("Rectified Hand with landmark", img_hand)
+            # if cv2.waitKey(5) & 0xFF == 'q':
+            #     break
             
             # convert normlized landmark in rectified hand area to absoluate coordinate in ROTATED FULL IMAGE, which is then normalized
             norm_roted_landmark = get_absolute_rect_norm_landmark(norm_landmark, roted_hand_box, (H,W))
             img_r = draw_landmarks(img_r, norm_roted_landmark)
 
             # TODO:debug rotate full image back
-            img_r, _ = rotate_image(img_r, -angle_full, (W/2, H/2))
+            img_r_, _ = rotate_image(img_r, -angle_full, (W/2, H/2))
             cv2.imshow("Rotated back img:", img_r_)
             if cv2.waitKey(5) & 0xFF == 'q':
                 break
-
+            
             # rot landmark back and render in src img
             src = render(src, norm_roted_landmark, angle_full)
 
@@ -178,9 +181,9 @@ while cap.isOpened():
                           (roted_hand_box.upperLeft_x, roted_hand_box.upperLeft_y),
                           (roted_hand_box.upperLeft_x + roted_hand_box.w, roted_hand_box.upperLeft_y + roted_hand_box.h),
                           (0,0,0), 1)
-            cv2.imshow("Rotated full image with box and landmark", img_r)
-            if cv2.waitKey(5) & 0xFF == 'q':
-                break
+            # cv2.imshow("Rotated full image with box and landmark", img_r)
+            # if cv2.waitKey(5) & 0xFF == 'q':
+            #     break
     else:
         flag_hand_in_img = False
         roted_hand_box.clear()

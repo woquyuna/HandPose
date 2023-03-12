@@ -61,7 +61,7 @@ def get_absolute_rect_norm_landmark(norm_landmark,
                                     roted_hand_box,
                                     full_image_size):
     H, W = full_image_size
-    roted_landmark = roted_hand_box.copy()
+    roted_landmark = norm_landmark.copy()
     n = len(norm_landmark) // 3
     for i in range(n):
         roted_landmark[i*3 + 0] = (norm_landmark[i*3 + 0] * roted_hand_box.w + roted_hand_box.upperLeft_x) / W
