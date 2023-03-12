@@ -18,4 +18,4 @@ def rotate_landmark(landmark, rot_m):
         rot_pt_y = np.dot(pt, rot_m[1])
         roted_landmark[i*3 + 0] = rot_pt_x
         roted_landmark[i*3 + 1] = rot_pt_y
-        return roted_landmark
+    return roted_landmark

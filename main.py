@@ -66,15 +66,15 @@ def render(src, norm_roted_landmark, angle):
     
     # TODO: How to compute rotation back matrix correctly
     # rotate landmark back to src image
-    center = np.array([W / 2, H / 2, 1])    # image center point to rotate
+    # center = np.array([W / 2, H / 2, 1])    # image center point to rotate
     # center point SHIFTs because image is a RECANGLE when rotating and then crop to rectangle, square is no need
-    center_rot = [0,0]
-    center_rot[0] = np.dot(center, rot_m[0])
-    center_rot[1] = np.dot(center, rot_m[1])
+    # center_rot = [0,0]
+    # center_rot[0] = np.dot(center, rot_m[0])
+    # center_rot[1] = np.dot(center, rot_m[1])
     
     # compute rotate back matrix NO NEED FOR TO COMPUTE NEW CENTER
-    # _, rot_m_inv = rotate_image(src.copy(), -angle, (W/2, H/2))
-    _, rot_m_inv = rotate_image(src.copy(), -angle, center_rot)
+    _, rot_m_inv = rotate_image(src.copy(), -angle, (W/2, H/2))
+    # _, rot_m_inv = rotate_image(src.copy(), -angle, center_rot)
 
     landmark = rotate_landmark(roted_landmark, rot_m_inv)
     # normalize landmark to draw
